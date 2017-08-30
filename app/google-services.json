@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "327999709255",
+    "firebase_url": "https://fir-hero-df82e.firebaseio.com",
+    "project_id": "fir-hero-df82e",
+    "storage_bucket": "fir-hero-df82e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:327999709255:android:4cf8196c95a786f2",
+        "android_client_info": {
+          "package_name": "com.silvertrinity.firebasehero"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "327999709255-i3lj5ugsfd2urcmg7r0va1blk5ud3abg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqU6S18byc3YCxCXiEfEIqiTKU2RCqOEQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
