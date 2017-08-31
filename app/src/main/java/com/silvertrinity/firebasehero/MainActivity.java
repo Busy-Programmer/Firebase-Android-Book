@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                FirebaseMessaging.getInstance().subscribeToTopic("news");
+                Snackbar.make(view, "Subscribed to news alert!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
