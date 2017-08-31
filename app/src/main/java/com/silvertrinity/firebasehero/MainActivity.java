@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crash.FirebaseCrash;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            FirebaseCrash.report(new Exception("Settings not working."));
+            //return true;
         }
 
         return super.onOptionsItemSelected(item);
