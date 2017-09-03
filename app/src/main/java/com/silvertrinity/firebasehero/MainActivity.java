@@ -1,29 +1,46 @@
 package com.silvertrinity.firebasehero;
 
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
+import android.graphics.Color;
+import android.graphics.Rect;
+
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.crash.FirebaseCrash;
-import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.silvertrinity.firebasehero.models.Note;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     // Initialize the FirebaseAnalytics variable
     private FirebaseAnalytics mFirebaseAnalytics;
+    // Creates the reference to the Firebase database
+    DatabaseReference database;
+    NotesRecyclerViewAdapter adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,11 +49,73 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Obtains the Firebase referenbce
+        database = FirebaseDatabase.getInstance().getReference();
+        // Create the adapter
+        adapter = new NotesRecyclerViewAdapter(Collections.<Note>emptyList());
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        final int offset = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
+        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+                if (parent.getChildAdapterPosition(view) != parent.getAdapter().getItemCount() - 1) {
+                    outRect.bottom = offset;
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FirebaseMessaging.getInstance().subscribeToTopic("news");
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Add New Note!");
+
+                // Set the LinearLayout with vertical orientation
+                LinearLayout layout = new LinearLayout(getApplicationContext());
+                layout.setOrientation(LinearLayout.VERTICAL);
+
+                // Set up the input
+                final EditText titleInput = new EditText(getApplicationContext());
+                titleInput.setTextColor(Color.BLACK);
+                final EditText contentInput = new EditText(getApplicationContext());
+                contentInput.setTextColor(Color.BLACK);
+
+                // Add the EditText views
+                layout.addView(titleInput);
+                layout.addView(contentInput);
+                // Set the view with linear layout
+                builder.setView(layout);
+
+                // Set up the buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        Note note = new Note();
+                        note = new Note();
+                        note.setNoteId(database.child("notes").push().getKey());
+                        note.setTitle(titleInput.getText().toString());
+                        note.setContent(contentInput.getText().toString());
+                        database.child("notes").child(note.getNoteId()).setValue(note);
+
+                        adapter.notifyDataSetChanged();
+
+                        Toast.makeText(getApplicationContext(), "Note added!", Toast.LENGTH_LONG).show();
+
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
                 Snackbar.make(view, "Subscribed to news alert!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -48,14 +127,6 @@ public class MainActivity extends AppCompatActivity {
         mFirebaseAnalytics.setAnalyticsCollectionEnabled(true);
         //Sets the minimum engagement time required before starting a session. The default value is 10000 (10 seconds). Let's make it 20 seconds.
         mFirebaseAnalytics.setMinimumSessionDuration(20000);
-
-        // Checks whether the app opens for the first time
-        if(checkWhetherFirstOpen() == 1){
-            showPoll();
-            setAppFirstOpenValue(2); // To show the dialog later
-        }else{
-            setAppFirstOpenValue(1);
-        }
     }
 
     @Override
@@ -67,100 +138,37 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+
         if (id == R.id.action_settings) {
-            FirebaseCrash.report(new Exception("Settings not working."));
-            //return true;
+
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void showPoll(){
-        CharSequence colors[] = new CharSequence[] {"Yes", "No", "Need Improvements", "Rate the app"};
-
-        final Bundle bundle = new Bundle();
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Do you like this app?");
-        builder.setItems(colors, new DialogInterface.OnClickListener() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        database.child("notes").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        Toast.makeText(getApplicationContext(), "Thanks for the feedback!", Toast.LENGTH_LONG).show();
-                        bundle.putInt(FirebaseAnalytics.Param.ITEM_ID, which);
-                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Yes");
-                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "text");
-                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
-                        //Sets a user property to a given value.
-                        mFirebaseAnalytics.setUserProperty("feedback", "Yes");
-                        break;
-                    case 1:
-                        Toast.makeText(getApplicationContext(), "Thanks for the feedback!", Toast.LENGTH_LONG).show();
-                        bundle.putInt(FirebaseAnalytics.Param.ITEM_ID, which);
-                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "No");
-                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "text");
-                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
-                        //Sets a user property to a given value.
-                        mFirebaseAnalytics.setUserProperty("feedback", "No");
-                        break;
-                    case 2:
-                        Toast.makeText(getApplicationContext(), "Thanks for the feedback!", Toast.LENGTH_LONG).show();
-                        bundle.putInt(FirebaseAnalytics.Param.ITEM_ID, which);
-                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Need Improvements");
-                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "text");
-                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
-                        //Sets a user property to a given value.
-                        mFirebaseAnalytics.setUserProperty("feedback", "Need Improvements");
-                        break;
-                    case 3:
-                        Toast.makeText(getApplicationContext(), "Thanks for the feedback!", Toast.LENGTH_LONG).show();
-                        bundle.putInt(FirebaseAnalytics.Param.ITEM_ID, which);
-                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Rate the app");
-                        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "text");
-                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
-                        //Sets a user property to a given value.
-                        mFirebaseAnalytics.setUserProperty("feedback", "Rate the app");
-
-                        // To start play store
-                        final String appPackageName = getPackageName(); // getPackageName() from Context or Activity object
-                        try {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                        } catch (android.content.ActivityNotFoundException anfe) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                        }
-                        break;
-                    default:
-                        Toast.makeText(getApplicationContext(), "Thank you!", Toast.LENGTH_LONG).show();
-                        break;
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Note> notes = new ArrayList<>();
+                for (DataSnapshot noteDataSnapshot : dataSnapshot.getChildren()) {
+                    Note note = noteDataSnapshot.getValue(Note.class);
+                    notes.add(note);
                 }
+
+                adapter.updateList(notes);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
-        builder.show();
+
     }
-
-    // Checks if the app start for the first time
-    private int checkWhetherFirstOpen() {
-        // If this method returns 1, it means first time app open
-        // If it returns another number other than 1, it means this is not first time.
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        int defaultValue = sharedPref.getInt("first_open", 0);
-
-        return defaultValue;
-    }
-
-    private void setAppFirstOpenValue(int number){
-        // writes to the sharedpreference
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("first_open", number);
-        editor.commit();
-    }
-
 }

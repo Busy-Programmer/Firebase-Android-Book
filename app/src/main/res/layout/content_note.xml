@@ -5,14 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.silvertrinity.firebasehero.MainActivity"
-    tools:showIn="@layout/activity_main">
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        tools:listitem="@layout/note_item" />
+    tools:context="com.silvertrinity.firebasehero.NoteActivity"
+    tools:showIn="@layout/activity_note">
 
 </android.support.constraint.ConstraintLayout>

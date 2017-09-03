@@ -8,24 +8,21 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
+        android:name=".FirebaseHeroApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <service
-            android:name=".messaging.MyFirebaseMessagingService">
+        <service android:name=".messaging.MyFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <service
-            android:name=".messaging.MyFirebaseInstanceIDService">
+        <service android:name=".messaging.MyFirebaseInstanceIDService">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 
@@ -39,6 +36,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".NoteActivity"
+            android:label="@string/title_activity_note"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
