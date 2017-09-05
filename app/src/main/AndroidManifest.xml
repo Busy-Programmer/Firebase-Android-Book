@@ -39,6 +39,18 @@
         <activity
             android:name=".NoteActivity"
             android:label="@string/title_activity_note"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".auth.RegisterUserActivity"
+            android:label="@string/title_activity_register_user"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".auth.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".auth.PasswordRecoveryActivity"
+            android:label="@string/title_activity_password_recovery"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

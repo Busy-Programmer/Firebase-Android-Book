@@ -1,10 +1,12 @@
 package com.silvertrinity.firebasehero;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -21,12 +23,17 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.silvertrinity.firebasehero.auth.RegisterUserActivity;
 import com.silvertrinity.firebasehero.models.Note;
 
 import java.util.ArrayList;
@@ -41,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference database;
     NotesRecyclerViewAdapter adapter;
 
+    // Initialize FirebaseAuth and AuthStateListener
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseAuth.AuthStateListener mAuthStateListener;
+
+    private static final int RC_SIGN_IN = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +60,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        if (mFirebaseAuth.getCurrentUser() == null) {
+            // User is not logged in
+            startActivity(new Intent(this, RegisterUserActivity.class));
+        }
 
         // Obtains the Firebase referenbce
         database = FirebaseDatabase.getInstance().getReference();
@@ -141,9 +159,11 @@ public class MainActivity extends AppCompatActivity {
 
         int id = item.getItemId();
 
-
         if (id == R.id.action_settings) {
-
+            // Implement later
+        }else if(id == R.id.action_signout){
+            mFirebaseAuth.signOut();
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -170,5 +190,56 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void updateUser(String newEmail){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        user.updateEmail(newEmail)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            // User email change successful.
+                        } else {
+                            // User email change unsuccessful
+                        }
+                    }
+                });
+
+    }
+
+    private boolean isUserLoggedIn(){
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        if (mFirebaseAuth.getCurrentUser() != null) {
+            // User is logged in
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private void deleteUser(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            user.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(
+                                MainActivity.this,
+                                "Your profile is deleted",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    } else {
+                        Toast.makeText(
+                                MainActivity.this,
+                                "Failed to delete your account!",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+            });
+        }
     }
 }
