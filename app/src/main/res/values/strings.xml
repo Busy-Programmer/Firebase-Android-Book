@@ -22,5 +22,9 @@
     <string name="forgot_password">Password Recovery</string>
     <string name="forgot_password_msg">Enter the email to reset the password.</string>
     <string name="btn_reset_password">Reset Password</string>
+    <string name="title_activity_my_profile">MyProfileActivity</string>
+
+    <string name="submit_btn_string">Upload</string>
+    <string name="action_profile">Profile</string>
 
 </resources>

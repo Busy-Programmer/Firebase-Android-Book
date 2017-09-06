@@ -164,6 +164,8 @@ public class MainActivity extends AppCompatActivity {
         }else if(id == R.id.action_signout){
             mFirebaseAuth.signOut();
             finish();
+        }else if(id == R.id.action_profile){
+            startActivity(new Intent(this, MyProfileActivity.class));
         }
 
         return super.onOptionsItemSelected(item);
