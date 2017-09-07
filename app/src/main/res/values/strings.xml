@@ -26,5 +26,6 @@
 
     <string name="submit_btn_string">Upload</string>
     <string name="action_profile">Profile</string>
+    <string name="title_activity_splash">SplashActivity</string>
 
 </resources>
