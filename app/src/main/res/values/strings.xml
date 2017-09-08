@@ -28,4 +28,12 @@
     <string name="action_profile">Profile</string>
     <string name="title_activity_splash">SplashActivity</string>
 
+    <string name="banner_ad_unit_id" >ca-app-pub-3940256099942544/6300978111</string>
+
+    <string name="invitation_title">Invite Friends</string>
+    <string name="invitation_message">This app is terrific, give it a try and get $5 off!</string>
+    <string name="invitation_deep_link">http://example.com/offer/five_dollar_offer</string>
+    <string name="invitation_custom_image">https://developers.google.com/identity/images/g-logo.png</string>
+    <string name="invitation_cta">Install!</string>
+    <string name="action_invite">Invite Friends</string>
 </resources>
